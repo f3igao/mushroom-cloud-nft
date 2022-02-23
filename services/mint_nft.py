@@ -4,16 +4,12 @@ from algosdk.future import transaction
 from algosdk.v2client import algod
 from dotenv import load_dotenv
 
-CID = "bafybeige4l7jsl536ps4ufok674bsdn4cprbpwplu2glhdxprqxucj46ti"
+CID = "bafybeidhxawiaatauhvxa5l32m4fdaavyztqdrnlz63po2aq5wwerbpmoe"
 IPFS_URL = "ipfs://" + CID
 print(f'ipfs url: {IPFS_URL}')
 
 json_metadata_raw = open('assets/mock_metadata.json')
 json_metadata = json_metadata_raw.read()
-
-
-# json_metadata_encoded = json_metadata_raw.encode('ascii')
-# json_metadata_base64 = base64.b64encode(json_metadata_encoded)
 
 
 def create_algod_client():
@@ -46,7 +42,8 @@ def create_asa():
         # metadata_hash="",
         strict_empty_address_check=False,
         decimals=0,
-        note=json_metadata.encode(),
+        # TODO: add ARC69 metadata
+        # note=json_metadata.encode(),
     )
 
     # sign transaction with our private key to confirm authorization

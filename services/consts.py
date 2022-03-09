@@ -20,4 +20,4 @@ class AppVariables:
 class DefaultValues:
     RoyaltyFee = int(50)
     WaitingTime = int(15)
-    # BetAmount = Int(1000000)  # 1 algo
+    NFTPrice = int(1000000)  # 1 algo

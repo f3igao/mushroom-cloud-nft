@@ -33,7 +33,7 @@ def send_payment(receiver: Addr, amount: Int) -> TealType.none:
 def transfer_asset(sender: Addr, receiver: Addr, asset_id: Int) -> TealType.none:
     # transfers an asset from one acct to another
     # can be used to opt in an asset if 'amount' is 0 and `sender` is equal to `receiver`
-    # asset_id must also be passed in the `foreignAssets` field in the outer transaction (otherwise reference error)
+    # asset_id must also be passed in the `foreign_assets` field in the outer transaction (otherwise reference error)
     return Seq([
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields({

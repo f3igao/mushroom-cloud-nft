@@ -93,7 +93,8 @@ app_id = create_app(
 
 app_address = get_application_address(app_id)
 
-print(f'Application ID: {app_id}, Application Address: {app_address}')
+print(f'application id: {app_id}')
+print(f'application address: {app_address}')
 
 with open('../.env', 'a') as f:
     f.write(f'APP_ID={app_id}\n')

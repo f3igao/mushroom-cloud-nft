@@ -15,11 +15,11 @@ def approval_program():
         default_transaction_checks(Int(0)),  # call default transaction checks
         asset_decimals,  # load the asset decimals
         Assert(asset_decimals.hasValue()),
-        Assert(asset_decimals.value() == Int(0)),  # verify that there are no decimals
-        asset_frozen,  # load the frozen parameter of the asset
-        Assert(asset_frozen.hasValue()),
+        Assert(asset_decimals.value() == Int(0)),  # verify that there are no decimal
+        # asset_frozen,  # load the frozen parameter of the asset
+        # Assert(asset_frozen.hasValue()),
         # Assert(asset_frozen.value() == Global.current_application_address()),  # verify the freeze address is contract
-        Assert(asset_frozen.value() == Int(0)),  # verify that the asset is not frozen
+        # Assert(asset_frozen.value() == Int(0)),  # verify that the asset is not frozen
         App.globalPut(AppVariables.Creator, Txn.application_args[0]),  # save the initial creator
         App.globalPut(AppVariables.AssetId, Btoi(Txn.application_args[1])),  # save the asset ID
         App.globalPut(AppVariables.royaltyFee, royalty_fee),  # save the royalty fee
@@ -32,23 +32,23 @@ def approval_program():
     #   2. payment amount
     # first verify the seller owns the NFT, then locally save the arguments
     price = Btoi(Txn.application_args[1])
-    asset_clawback = AssetParam.clawback(App.globalGet(AppVariables.AssetId))
-    asset_freeze = AssetParam.freeze(App.globalGet(AppVariables.AssetId))
+    # asset_clawback = AssetParam.clawback(App.globalGet(AppVariables.AssetId))
+    # asset_freeze = AssetParam.freeze(App.globalGet(AppVariables.AssetId))
     setup_sale = Seq([
-        Assert(Txn.application_args.length() == Int(2)),  # check that there are 2 arguments
-        Assert(Global.group_size() == Int(1)),  # verify that it is only 1 transaction
+        # Assert(Txn.application_args.length() == Int(2)),  # check that there are 2 arguments
+        # Assert(Global.group_size() == Int(1)),  # verify that it is only 1 transaction
         default_transaction_checks(Int(0)),  # perform default transaction checks
         Assert(price > Int(0)),  # check that the price is greater than 0
-        asset_clawback,  # verify that the clawback address is the contract
-        Assert(asset_clawback.hasValue()),
-        Assert(asset_clawback.value() == Global.current_application_address()),
-        asset_freeze,  # verify that the freeze address is the contract
-        Assert(asset_freeze.hasValue()),
-        Assert(asset_freeze.value() == Global.current_application_address()),
+        # asset_clawback,  # verify that the clawback address is the contract
+        # Assert(asset_clawback.hasValue()),
+        # Assert(asset_clawback.value() == Global.current_application_address()),
+        # asset_freeze,  # verify that the freeze address is the contract
+        # Assert(asset_freeze.hasValue()),
+        # Assert(asset_freeze.value() == Global.current_application_address()),
         check_nft_balance(Txn.sender(), App.globalGet(AppVariables.AssetId)),  # verify that the seller owns the NFT
-        Assert(price > service_cost),  # Check that the price is greater than the service cost
-        App.localPut(Txn.sender(), AppVariables.amountPayment, price),  # Save the price
-        App.localPut(Txn.sender(), AppVariables.approveTransfer, Int(0)),  # Reject transfer until payment is done
+        Assert(price > service_cost),  # check that the price is greater than the service cost
+        App.localPut(Txn.sender(), AppVariables.amountPayment, price),  # save the price
+        App.localPut(Txn.sender(), AppVariables.approveTransfer, Int(0)),  # reject transfer until payment is done
         Approve()
     ])
 
@@ -66,17 +66,17 @@ def approval_program():
         # Assert(Gtxn[0].application_args.length() == Int(2)),  # check that there are 2 arguments
         # Assert(Global.group_size() == Int(2)),  # check that there are 2 transactions
         # Assert(Gtxn[1].type_enum() == TxnType.Payment),  # check that the second transaction is a payment
-        # Assert(App.globalGet(AppVariables.AssetId) == Btoi(Gtxn[0].application_args[1])),  # ensure correct assetId
-        # Assert(approval == Int(0)),  # check that the transfer has not been issued yet
-        # Assert(amt_to_pay == Gtxn[1].amount()),  # check that the amount to be paid is correct
-        # Assert(Global.current_application_address() == Gtxn[1].receiver()),  # ensure payment receiver is current app
+        Assert(App.globalGet(AppVariables.AssetId) == Btoi(Gtxn[0].application_args[1])),  # ensure correct assetId
+        Assert(approval == Int(0)),  # check that the transfer has not been issued yet
+        Assert(amt_to_pay == Gtxn[1].amount()),  # check that the amount to be paid is correct
+        Assert(Global.current_application_address() == Gtxn[1].receiver()),  # ensure payment receiver is current app
         # default_transaction_checks(Int(0)),  # perform default transaction checks
         # default_transaction_checks(Int(1)),  # perform default transaction checks
-        # check_nft_balance(seller, App.globalGet(AppVariables.AssetId)),  # check that the seller owns the NFT
-        # Assert(buyer != seller),  # make sure the seller is not the buyer
-        # App.localPut(seller, AppVariables.approveTransfer, Int(1)),  # approve the transfer from seller' side
-        # App.localPut(buyer, AppVariables.approveTransfer, Int(1)),  # approve the transfer from buyer' side
-        # App.localPut(seller, AppVariables.roundSaleBegan, Global.round()),  # save the round number
+        check_nft_balance(seller, App.globalGet(AppVariables.AssetId)),  # check that the seller owns the NFT
+        Assert(buyer != seller),  # make sure the seller is not the buyer
+        App.localPut(seller, AppVariables.approveTransfer, Int(1)),  # approve the transfer from seller' side
+        App.localPut(buyer, AppVariables.approveTransfer, Int(1)),  # approve the transfer from buyer' side
+        App.localPut(seller, AppVariables.roundSaleBegan, Global.round()),  # save the round number
         Approve()
     ])
 
@@ -88,29 +88,29 @@ def approval_program():
     collected_fees = App.globalGet(AppVariables.collectedFees)
     fees_to_pay = ScratchVar(TealType.uint64)
     execute_transfer = Seq([
-        # Assert(Gtxn[0].application_args.length() == Int(1)),  # check that there is only 1 argument
-        # Assert(Global.group_size() == Int(1)),  # check that is only 1 transaction
-        # default_transaction_checks(Int(0)),  # perform default transaction checks
-        # Assert(App.localGet(seller, AppVariables.approveTransfer) == Int(1)),  # approval is set to 1 on seller side
-        # # check approval from buyer' side, alternatively, seller can force transaction if enough time has passed
-        # Assert(Or(And(seller != buyer, App.localGet(buyer, AppVariables.approveTransfer) == Int(1)),
-        #           Global.round() > App.globalGet(AppVariables.waitingTime) + App.localGet(seller,
-        #                                                                                   AppVariables.roundSaleBegan))),
-        # Assert(service_cost < amt_to_pay),  # check underflow
-        # check_nft_balance(seller, App.globalGet(AppVariables.AssetId)),  # check that the seller owns the NFT
-        # # reduce number of subroutine calls by saving the variable inside a `temp` variable
-        # fees_to_pay.store(If(seller == App.globalGet(AppVariables.Creator)).Then(Int(0)).Else(
-        #     compute_royalty_fee(amt_to_pay - service_cost, royalty_fee))),
-        # # compute royalty fees: if the seller is the creator, the fees are 0
-        # Assert(Int(2 ** 64 - 1) - fees_to_pay.load() >= amt_to_pay - service_cost),  # check overflow on payment
-        # Assert(Int(2 ** 64 - 1) - collected_fees >= fees_to_pay.load()),  # check overflow on collected fees
-        # Assert(amt_to_pay - service_cost > fees_to_pay.load()),
-        # transfer_asset(seller, Gtxn[0].sender(), App.globalGet(AppVariables.AssetId)),  # transfer asset
-        # send_payment(seller, amt_to_pay - service_cost - fees_to_pay.load()),  # pay seller
-        # App.globalPut(AppVariables.collectedFees, collected_fees + fees_to_pay.load()),  # collect fees
-        # App.localDel(seller, AppVariables.amountPayment),  # delete local variables
-        # App.localDel(seller, AppVariables.approveTransfer),
-        # App.localDel(buyer, AppVariables.approveTransfer),
+        Assert(Gtxn[0].application_args.length() == Int(1)),  # check that there is only 1 argument
+        Assert(Global.group_size() == Int(1)),  # check that is only 1 transaction
+        default_transaction_checks(Int(0)),  # perform default transaction checks
+        Assert(App.localGet(seller, AppVariables.approveTransfer) == Int(1)),  # approval is set to 1 on seller side
+        # check approval from buyer' side, alternatively, seller can force transaction if enough time has passed
+        Assert(Or(And(seller != buyer, App.localGet(buyer, AppVariables.approveTransfer) == Int(1)),
+                  Global.round() > App.globalGet(AppVariables.waitingTime) + App.localGet(seller,
+                                                                                          AppVariables.roundSaleBegan))),
+        Assert(service_cost < amt_to_pay),  # check underflow
+        check_nft_balance(seller, App.globalGet(AppVariables.AssetId)),  # check that the seller owns the NFT
+        # reduce number of subroutine calls by saving the variable inside a `temp` variable
+        fees_to_pay.store(If(seller == App.globalGet(AppVariables.Creator)).Then(Int(1)).Else(
+            compute_royalty_fee(amt_to_pay - service_cost, royalty_fee))),
+        # compute royalty fees: if the seller is the creator, the fees are 0
+        Assert(Int(2 ** 64 - 1) - fees_to_pay.load() >= amt_to_pay - service_cost),  # check overflow on payment
+        Assert(Int(2 ** 64 - 1) - collected_fees >= fees_to_pay.load()),  # check overflow on collected fees
+        Assert(amt_to_pay - service_cost > fees_to_pay.load()),
+        transfer_asset(seller, Gtxn[0].sender(), App.globalGet(AppVariables.AssetId)),  # transfer asset
+        send_payment(seller, amt_to_pay - service_cost - fees_to_pay.load()),  # pay seller
+        App.globalPut(AppVariables.collectedFees, collected_fees + fees_to_pay.load()),  # collect fees
+        App.localDel(seller, AppVariables.amountPayment),  # delete local variables
+        App.localDel(seller, AppVariables.approveTransfer),
+        App.localDel(buyer, AppVariables.approveTransfer),
         Approve()
     ])
 
@@ -149,7 +149,7 @@ def approval_program():
     # [call sequence]
     # checks that the first transaction is an Application call, and that there is at least 1 argument
     # then checks the first argument of the call, the first argument must be a valid value between
-    # "setup_sale", "buy", "executeTransfer", "refund" and "claimFees"
+    # "setup_sale", "buy", "execute_transfer", "refund" and "claimFees"
     on_call = If(Or(Txn.type_enum() != TxnType.ApplicationCall, Txn.application_args.length() == Int(0))).Then(
         Reject()).ElseIf(Txn.application_args[0] == AppVariables.setupSale).Then(setup_sale).ElseIf(
         Txn.application_args[0] == AppVariables.buy).Then(buy).ElseIf(

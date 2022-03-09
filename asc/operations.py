@@ -41,7 +41,6 @@ def create_app(
         app_args,
         foreign_assets=foreign_assets,
     )
-    # sign transaction
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
@@ -72,8 +71,6 @@ def opt_in_app(client, private_key, index):
 
     # create unsigned transaction
     txn = transaction.ApplicationOptInTxn(sender, params, index)
-
-    # sign transaction
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
@@ -83,7 +80,7 @@ def opt_in_app(client, private_key, index):
 
     # display results
     transaction_response = client.pending_transaction_info(txn_id)
-    print('opt-in to app-id:', transaction_response['txn']['txn']['app_id'])
+    print('opt-in to app with id:', transaction_response['txn']['txn']['apid'])
 
 
 def send_funds(client, private_key, receiver):
@@ -98,52 +95,46 @@ def send_funds(client, private_key, receiver):
 
     # create unsigned transaction
     txn = transaction.PaymentTxn(sender, params, receiver, 200000, None)
-
-    # sign transaction
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
     client.send_transactions([signed_txn])
-
     wait_for_confirmation(client, txn_id)
-
     print(f'transaction id: {txn_id}')
 
 
-def set_clawback(client: AlgodClient, private_key: str, asset_id, app_address):
-    # define manager as creator
-    manager = account.address_from_private_key(private_key)
-    print('manager address:', manager)
-    print('app address:', app_address)
-    # get node suggested parameters
-    params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
-
-    # create unsigned transaction
-    txn = transaction.AssetConfigTxn(
-        sender=manager,
-        sp=params,
-        index=asset_id,
-        manager=manager,
-        reserve=manager,
-        freeze=app_address,
-        clawback=app_address,
-    )
-
-    # sign transaction
-    signed_txn = txn.sign(private_key)
-    txn_id = signed_txn.transaction.get_txid()
-
-    print('sending set_clawback transaction')
-    client.send_transactions([signed_txn])
-
-    print('waiting for set_clawback confirmation')
-    wait_for_confirmation(client, txn_id)
-
-    return txn_id
-
+# def set_clawback(client: AlgodClient, private_key: str, asset_id, app_address):
+#     # define manager as creator
+#     manager = account.address_from_private_key(private_key)
+#     print('manager address:', manager)
+#     print('app address:', app_address)
+#     # get node suggested parameters
+#     params = client.suggested_params()
+#     # comment out the next two lines to use suggested fees
+#     # params.flat_fee = True
+#     # params.fee = 1000
+#
+#     # create unsigned transaction
+#     txn = transaction.AssetConfigTxn(
+#         sender=manager,
+#         sp=params,
+#         index=asset_id,
+#         manager=manager,
+#         reserve=manager,
+#         freeze=app_address,
+#         clawback=app_address,
+#     )
+#     signed_txn = txn.sign(private_key)
+#     txn_id = signed_txn.transaction.get_txid()
+#
+#     print('sending set_clawback transaction')
+#     client.send_transactions([signed_txn])
+#
+#     print('waiting for set_clawback confirmation')
+#     wait_for_confirmation(client, txn_id)
+#
+#     return txn_id
+#
 
 # setup sale using the application
 def setup_sale(
@@ -155,9 +146,7 @@ def setup_sale(
 ):
     # define sender as creator
     sender = account.address_from_private_key(private_key)
-
     on_complete = transaction.OnComplete.NoOpOC
-
     # get node suggested parameters
     params = client.suggested_params()
     # comment out the next two lines to use suggested fees
@@ -173,8 +162,6 @@ def setup_sale(
         app_args=app_args,
         foreign_assets=foreign_assets,
     )
-
-    # sign transaction
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
@@ -227,8 +214,6 @@ def buy_asset(
     )
 
     transaction.assign_group_id([app_call_txn, pay_txn])
-
-    # sign transactions
     signed_app_call_txn = app_call_txn.sign(private_key)
     signed_pay_txn = pay_txn.sign(private_key)
 
@@ -264,8 +249,8 @@ def buyer_execute_transfer(
     # get node suggested parameters
     params = client.suggested_params()
     # comment out the next two (2) lines to use suggested fees
-    params.flat_fee = True
-    params.fee = 1000
+    # params.flat_fee = True
+    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.ApplicationCallTxn(
@@ -277,8 +262,6 @@ def buyer_execute_transfer(
         accounts=[seller_address],
         foreign_assets=foreign_assets,
     )
-
-    # sign transaction
     signed_txn = txn.sign(buyer_private_key)
     txn_id = signed_txn.transaction.get_txid()
 
@@ -300,9 +283,7 @@ def claim_fees(
 ):
     # define sender as creator
     creator = account.address_from_private_key(private_key)
-
     on_complete = transaction.OnComplete.NoOpOC
-
     # get node suggested parameters
     params = client.suggested_params()
     # comment out the next two (2) lines to use suggested fees
@@ -317,8 +298,6 @@ def claim_fees(
         on_complete=on_complete,
         app_args=app_args,
     )
-
-    # sign transaction
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 

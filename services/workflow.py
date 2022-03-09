@@ -1,12 +1,13 @@
 import os
 
 from algosdk.future import transaction
-from asc.operations import (opt_in_app, send_funds, set_clawback, setup_sale, buy_asset, buyer_execute_transfer,
+from dotenv import load_dotenv
+
+from asc.operations import (opt_in_app, send_funds, setup_sale, buy_asset, buyer_execute_transfer,
                             claim_fees)
 from asc.utils import (get_public_key_from_mnemonic, get_private_key_from_mnemonic, int_to_bytes, print_asset_holding,
                        wait_for_confirmation, create_algod_client)
-
-from dotenv import load_dotenv
+from services.consts import DefaultValues
 
 load_dotenv()
 cwd = os.getcwd()
@@ -71,13 +72,11 @@ for wallet_num, value in accounts.items():
             amt=0,
             index=asset_id,
         )
-        stxn = txn.sign(accounts[wallet_num]['sk'])
-        txid = algod_client.send_transaction(stxn)
-        print(txid)
-        # Wait for the transaction to be confirmed
-        wait_for_confirmation(algod_client, txid)
-        # Now check the asset holding for that account.
-        # This should now show a holding with a balance of 0.
+        signed_txn = txn.sign(accounts[wallet_num]['sk'])
+        txn_id = algod_client.send_transaction(signed_txn)
+        print('txn_id:', txn_id)
+        wait_for_confirmation(algod_client, txn_id)
+        # check the asset holding for that account (should now show a holding with a balance of 0)
         print(f'asset opt-in for address: {accounts[wallet_num]["pk"]}')
         print_asset_holding(algod_client, accounts[wallet_num]['pk'], asset_id)
 
@@ -85,27 +84,20 @@ for wallet_num, value in accounts.items():
 send_funds(algod_client, creator_private_key, app_address)
 
 # setting clawback
-set_clawback(algod_client, creator_private_key, asset_id, app_address)
-print(f'set clawback address to: {app_address}')
+# set_clawback(algod_client, creator_private_key, asset_id, app_address)
+# print(f'set clawback address to: {app_address}')
 
 # opt into application
-opt_in_app(algod_client, creator_private_key, app_id)
-opt_in_app(algod_client, buyer_1_private_key, app_id)
-opt_in_app(algod_client, buyer_2_private_key, app_id)
+# opt_in_app(algod_client, creator_private_key, app_id)
+# opt_in_app(algod_client, buyer_1_private_key, app_id)
+# opt_in_app(algod_client, buyer_2_private_key, app_id)
 
 foreign_assets = [asset_id]
-asa_price = 1000000
 
 # create list of bytes for sale setup app args
-sale_args = [
-    'setupSale'.encode(),
-    int_to_bytes(asa_price),
-]
-
-setup_txn_id = setup_sale(
-    algod_client, creator_private_key, app_id, sale_args, foreign_assets
-)
-print(f'Setup sale transaction ID: {setup_txn_id}')
+sale_args = ['setup_sale'.encode(), int_to_bytes(DefaultValues.NFTPrice)]
+setup_txn_id = setup_sale(algod_client, creator_private_key, app_id, sale_args, foreign_assets)
+print(f'setup sale transaction id: {setup_txn_id}')
 
 buy_args = [
     'buy'.encode(),
@@ -121,12 +113,10 @@ buy_asset(
     app_id,
     buy_args,
     foreign_assets,
-    asa_price,
+    DefaultValues.NFTPrice,
 )
 
-buyer_execute_args = [
-    "executeTransfer".encode(),
-]
+buyer_execute_args = ['execute_transfer'.encode()]
 
 # buyer executing transfer
 buyer_execute_transfer(
@@ -138,57 +128,43 @@ buyer_execute_transfer(
     foreign_assets,
 )
 
-print("---------sale from creator to buyer1 completed---------")
+print('---------sale from creator to buyer 1 completed---------')
+print('creator:')
 print_asset_holding(algod_client, creator_public_key, asset_id)
+print('buyer 1:')
 print_asset_holding(algod_client, buyer_1_public_key, asset_id)
 
-setup_txn_id_v2 = setup_sale(
-    algod_client, buyer_1_private_key, app_id, sale_args, foreign_assets
-)
-print(f"setup sale transaction ID: {setup_txn_id_v2}")
+# setup_txn_id_v2 = setup_sale(algod_client, buyer_1_private_key, app_id, sale_args, foreign_assets)
+# print(f'setup sale transaction ID: {setup_txn_id_v2}')
+# print('buyer 2 is attempting to buy the asset from buyer 1')
+# # buyer posting buy transactions
+# buy_asset(
+#     algod_client,
+#     buyer_2_private_key,
+#     buyer_1_public_key,
+#     app_id,
+#     buy_args,
+#     foreign_assets,
+#     DefaultValues.NFTPrice,
+# )
+#
+# # buyer executing transfer
+# buyer_execute_transfer(
+#     algod_client,
+#     buyer_2_private_key,
+#     buyer_1_public_key,
+#     app_id,
+#     buyer_execute_args,
+#     foreign_assets,
+# )
 
-print("buyer 2 is attempting to buy the asset from buyer 1")
-# buyer posting buy transactions
-buy_asset(
-    algod_client,
-    buyer_2_private_key,
-    buyer_1_public_key,
-    app_id,
-    buy_args,
-    foreign_assets,
-    asa_price,
-)
-
-# buyer executing transfer
-buyer_execute_transfer(
-    algod_client,
-    buyer_2_private_key,
-    buyer_1_public_key,
-    app_id,
-    buyer_execute_args,
-    foreign_assets,
-)
-
-print("---------sale from buyer 1 to buyer 2 completed---------")
-print_asset_holding(algod_client, buyer_1_public_key, asset_id)
-print_asset_holding(algod_client, buyer_2_public_key, asset_id)
-
-creator_claim_args = [
-    "claimFees".encode(),
-]
-
-creator_account_before = algod_client.account_info(creator_public_key).get("amount")
-print(
-    f"Creator account balance before claiming fees: {creator_account_before} microAlgos."
-)
-
-claim_fees(algod_client, creator_private_key, app_id, creator_claim_args)
-
-creator_account_after = algod_client.account_info(creator_public_key).get("amount")
-print(
-    f"Creator account balance after claiming fees: {creator_account_after} microAlgos."
-)
-
-print(
-    f"Total fees claimed: {creator_account_after - creator_account_before} microAlgos"
-)
+# print('---------sale from buyer 1 to buyer 2 completed---------')
+# print_asset_holding(algod_client, buyer_1_public_key, asset_id)
+# print_asset_holding(algod_client, buyer_2_public_key, asset_id)
+# creator_claim_args = ['claim_fees'.encode()]
+# creator_account_before = algod_client.account_info(creator_public_key).get('amount')
+# print(f'creator account balance before claiming fees: {creator_account_before} microAlgos.')
+# claim_fees(algod_client, creator_private_key, app_id, creator_claim_args)
+# creator_account_after = algod_client.account_info(creator_public_key).get('amount')
+# print(f'creator account balance after claiming fees: {creator_account_after} microAlgos.')
+# print(f'total fees claimed: {creator_account_after - creator_account_before} microAlgos')

@@ -1,0 +1,579 @@
+#pragma version 5
+txn ApplicationID
+int 0
+==
+bnz main_l23
+txn OnCompletion
+int CloseOut
+==
+bnz main_l22
+txn OnCompletion
+int OptIn
+==
+bnz main_l21
+txn OnCompletion
+int 0
+==
+bnz main_l5
+int 0
+return
+main_l5:
+txn TypeEnum
+int appl
+!=
+txn NumAppArgs
+int 0
+==
+||
+bnz main_l20
+txna ApplicationArgs 0
+byte "setup_sale"
+==
+bnz main_l19
+txna ApplicationArgs 0
+byte "buy"
+==
+bnz main_l18
+txna ApplicationArgs 0
+byte "execute_transfer"
+==
+bnz main_l14
+txna ApplicationArgs 0
+byte "refund"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "claim_fees"
+==
+bnz main_l12
+int 0
+return
+main_l12:
+global GroupSize
+int 1
+==
+assert
+txn NumAppArgs
+int 1
+==
+assert
+int 0
+callsub sub0
+txn Sender
+byte "creator"
+app_global_get
+==
+assert
+byte "collected_fees"
+app_global_get
+int 0
+>
+assert
+byte "creator"
+app_global_get
+byte "collected_fees"
+app_global_get
+callsub sub1
+byte "collected_fees"
+int 0
+app_global_put
+int 1
+return
+main_l13:
+global GroupSize
+int 1
+==
+assert
+txn NumAppArgs
+int 1
+==
+assert
+int 0
+callsub sub0
+gtxn 0 Sender
+gtxna 0 Accounts 1
+!=
+assert
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_get
+int 1
+==
+assert
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_get
+int 1
+==
+assert
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+global MinTxnFee
+>
+assert
+gtxn 0 Sender
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+global MinTxnFee
+-
+callsub sub1
+gtxna 0 Accounts 1
+byte "approve_transfer"
+int 0
+app_local_put
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_del
+int 1
+return
+main_l14:
+gtxn 0 NumAppArgs
+int 1
+==
+assert
+global GroupSize
+int 1
+==
+assert
+int 0
+callsub sub0
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_get
+int 1
+==
+assert
+gtxna 0 Accounts 1
+gtxn 0 Sender
+!=
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_get
+int 1
+==
+&&
+global Round
+byte "waiting_time"
+app_global_get
+gtxna 0 Accounts 1
+byte "round_sale_began"
+app_local_get
++
+>
+||
+assert
+int 2
+global MinTxnFee
+*
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+<
+assert
+gtxna 0 Accounts 1
+byte "assetId"
+app_global_get
+callsub sub3
+gtxna 0 Accounts 1
+byte "creator"
+app_global_get
+==
+bnz main_l17
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+byte "royalty_fee"
+app_global_get
+callsub sub4
+main_l16:
+store 8
+int 18446744073709551615
+load 8
+-
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+>=
+assert
+int 18446744073709551615
+byte "collected_fees"
+app_global_get
+-
+load 8
+>=
+assert
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+load 8
+>
+assert
+gtxna 0 Accounts 1
+gtxn 0 Sender
+byte "assetId"
+app_global_get
+callsub sub2
+gtxna 0 Accounts 1
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+load 8
+-
+callsub sub1
+byte "collected_fees"
+byte "collected_fees"
+app_global_get
+load 8
++
+app_global_put
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_del
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_del
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_del
+int 1
+return
+main_l17:
+int 0
+b main_l16
+main_l18:
+gtxn 0 NumAppArgs
+int 2
+==
+assert
+global GroupSize
+int 2
+==
+assert
+gtxn 1 TypeEnum
+int pay
+==
+assert
+byte "assetId"
+app_global_get
+gtxna 0 ApplicationArgs 1
+btoi
+==
+assert
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_get
+int 0
+==
+assert
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+gtxn 1 Amount
+==
+assert
+global CurrentApplicationAddress
+gtxn 1 Receiver
+==
+assert
+int 0
+callsub sub0
+int 1
+callsub sub0
+gtxna 0 Accounts 1
+byte "assetId"
+app_global_get
+callsub sub3
+gtxn 0 Sender
+gtxna 0 Accounts 1
+!=
+assert
+gtxna 0 Accounts 1
+byte "approve_transfer"
+int 1
+app_local_put
+gtxn 0 Sender
+byte "approve_transfer"
+int 1
+app_local_put
+gtxna 0 Accounts 1
+byte "round_sale_began"
+global Round
+app_local_put
+int 1
+return
+main_l19:
+txn NumAppArgs
+int 2
+==
+assert
+global GroupSize
+int 1
+==
+assert
+int 0
+callsub sub0
+txna ApplicationArgs 1
+btoi
+int 0
+>
+assert
+byte "assetId"
+app_global_get
+asset_params_get AssetClawback
+store 4
+store 5
+load 4
+assert
+load 5
+global CurrentApplicationAddress
+==
+assert
+byte "assetId"
+app_global_get
+asset_params_get AssetFreeze
+store 6
+store 7
+load 6
+assert
+load 7
+global CurrentApplicationAddress
+==
+assert
+txn Sender
+byte "assetId"
+app_global_get
+callsub sub3
+txna ApplicationArgs 1
+btoi
+int 2
+global MinTxnFee
+*
+>
+assert
+txn Sender
+byte "amount_payment"
+txna ApplicationArgs 1
+btoi
+app_local_put
+txn Sender
+byte "approve_transfer"
+int 0
+app_local_put
+int 1
+return
+main_l20:
+int 0
+return
+main_l21:
+int 1
+return
+main_l22:
+int 1
+return
+main_l23:
+txn TypeEnum
+int appl
+==
+assert
+txn NumAppArgs
+int 4
+==
+assert
+txna ApplicationArgs 2
+btoi
+int 1000
+<=
+assert
+int 0
+callsub sub0
+txna ApplicationArgs 1
+btoi
+asset_params_get AssetDecimals
+store 0
+store 1
+load 0
+assert
+load 1
+int 0
+==
+assert
+txna ApplicationArgs 1
+btoi
+asset_params_get AssetDefaultFrozen
+store 2
+store 3
+load 2
+assert
+load 3
+int 0
+==
+assert
+byte "creator"
+txna ApplicationArgs 0
+app_global_put
+byte "assetId"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "royalty_fee"
+txna ApplicationArgs 2
+btoi
+app_global_put
+byte "waiting_time"
+txna ApplicationArgs 3
+btoi
+app_global_put
+int 1
+return
+sub0: // default_transaction_checks
+store 9
+load 9
+global GroupSize
+<
+assert
+load 9
+gtxns RekeyTo
+global ZeroAddress
+==
+assert
+load 9
+gtxns CloseRemainderTo
+global ZeroAddress
+==
+assert
+load 9
+gtxns AssetCloseTo
+global ZeroAddress
+==
+assert
+retsub
+sub1: // send_payment
+store 11
+store 10
+itxn_begin
+int pay
+itxn_field TypeEnum
+load 11
+itxn_field Amount
+load 10
+itxn_field Receiver
+global MinTxnFee
+itxn_field Fee
+itxn_submit
+retsub
+sub2: // transfer_asset
+store 14
+store 13
+store 12
+itxn_begin
+int axfer
+itxn_field TypeEnum
+int 1
+itxn_field AssetAmount
+load 13
+itxn_field AssetReceiver
+load 12
+itxn_field AssetSender
+load 14
+itxn_field XferAsset
+global MinTxnFee
+itxn_field Fee
+itxn_submit
+retsub
+sub3: // check_nft_balance
+store 16
+store 15
+load 15
+load 16
+asset_holding_get AssetBalance
+store 17
+store 18
+load 17
+int 1
+==
+assert
+load 18
+int 1
+==
+assert
+retsub
+sub4: // compute_royalty_fee
+store 20
+store 19
+load 19
+load 20
+callsub sub5
+load 19
+load 20
+*
+int 1000
+%
+store 21
+load 19
+load 20
+*
+int 1000
+/
+store 22
+load 20
+int 0
+==
+load 22
+int 0
+==
+||
+bnz sub4_l6
+load 20
+int 1000
+>=
+bnz sub4_l5
+load 21
+int 500
+>
+bnz sub4_l4
+load 22
+b sub4_l7
+sub4_l4:
+load 22
+int 1
++
+b sub4_l7
+sub4_l5:
+load 19
+b sub4_l7
+sub4_l6:
+int 0
+sub4_l7:
+retsub
+sub5: // check_royalty_fee_computation
+store 24
+store 23
+load 23
+int 0
+>
+assert
+load 24
+int 18446744073709551615
+load 23
+/
+<=
+assert
+retsub

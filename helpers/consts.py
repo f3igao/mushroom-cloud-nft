@@ -20,6 +20,14 @@ class AppVariables:
     refund = Bytes('refund')
 
 
+class AppArgs:
+    setup_sale = 'setup_sale'.encode()
+    buy = 'buy'.encode()
+    execute_transfer = 'execute_transfer'.encode()
+    claim_fees = 'claim_fees'.encode()
+    refund = 'refund'.encode()
+
+
 class DefaultValues:
     royalty_fee = int(50)
     waiting_time = int(15)

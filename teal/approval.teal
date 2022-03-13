@@ -228,6 +228,23 @@ byte "asset_id"
 app_global_get
 callsub sub2
 gtxna 0 Accounts 1
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+load 4
+-
+callsub sub1
+byte "collected_fees"
+byte "collected_fees"
+app_global_get
+load 4
++
+app_global_put
+gtxna 0 Accounts 1
 byte "amount_payment"
 app_local_del
 gtxna 0 Accounts 1

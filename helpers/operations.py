@@ -25,9 +25,6 @@ def create_app(
 
     # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.ApplicationCreateTxn(
@@ -52,7 +49,7 @@ def create_app(
     # display results
     transaction_response = client.pending_transaction_info(txn_id)
     app_id = transaction_response['application-index']
-    print('created new app with id', app_id)
+    print('created new app with id:', app_id)
     return app_id
 
 
@@ -64,9 +61,6 @@ def opt_in(client: AlgodClient, private_key: str, index: int):
 
     # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.ApplicationOptInTxn(sender, params, index)
@@ -89,9 +83,6 @@ def send_funds(client, private_key, receiver):
 
     # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.PaymentTxn(sender, params, receiver, 200000, None)
@@ -112,9 +103,6 @@ def set_clawback(client: AlgodClient, private_key: str, asset_id: int, app_addre
     print('app address:', app_address)
     # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.AssetConfigTxn(
@@ -138,21 +126,12 @@ def set_clawback(client: AlgodClient, private_key: str, asset_id: int, app_addre
 
 
 # setup sale using the application
-def setup_sale(
-        client: AlgodClient,
-        private_key,
-        app_id,
-        app_args,
-        foreign_assets,
-):
+def setup_sale(client: AlgodClient, private_key, app_id, app_args, foreign_assets):
     # define sender as creator
     sender = account.address_from_private_key(private_key)
     on_complete = transaction.OnComplete.NoOpOC
     # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two lines to use suggested fees
-    # params.flat_fee = True
-    # params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.ApplicationCallTxn(
@@ -175,20 +154,10 @@ def setup_sale(
 
 
 # setup sale using the application
-def buy_asset(
-        client: AlgodClient,
-        private_key,
-        app_account,
-        app_id,
-        app_args,
-        foreign_assets,
-        price: int,
-):
+def buy_asset(client: AlgodClient, private_key, app_account, app_id, app_args, foreign_assets, price: int):
     # define sender as creator
     buyer = account.address_from_private_key(private_key)
-
     app_address = get_application_address(app_id)
-
     on_complete = transaction.OnComplete.NoOpOC
 
     # get node suggested parameters
@@ -231,14 +200,7 @@ def buy_asset(
 # TODO: refund the transaction
 
 # execute the transfer
-def buyer_execute_transfer(
-        client: AlgodClient,
-        buyer_private_key,
-        seller_address,
-        app_id,
-        app_args,
-        foreign_assets,
-):
+def buyer_execute_transfer(client: AlgodClient, buyer_private_key, seller_address, app_id, app_args, foreign_assets):
     # define sender as creator
     buyer = account.address_from_private_key(buyer_private_key)
 
@@ -272,20 +234,10 @@ def buyer_execute_transfer(
 
 
 # claim royalty fees
-def claim_fees(
-        client: AlgodClient,
-        private_key,
-        app_id,
-        app_args,
-):
-    # define sender as creator
-    creator = account.address_from_private_key(private_key)
-    on_complete = transaction.OnComplete.NoOpOC
-    # get node suggested parameters
+def creator_claim_fees(client: AlgodClient, private_key: str, app_id: int, app_args):
+    creator = account.address_from_private_key(private_key)  # define sender as creator
+    on_complete = transaction.OnComplete.NoOpOC  # get node suggested parameters
     params = client.suggested_params()
-    # comment out the next two (2) lines to use suggested fees
-    params.flat_fee = True
-    params.fee = 1000
 
     # create unsigned transaction
     txn = transaction.ApplicationCallTxn(

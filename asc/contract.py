@@ -18,7 +18,7 @@ def approval():
 
     @Subroutine(TealType.none)
     def send_payment(receiver: Addr, amount: Int) -> TealType.none:
-        # sends payments from asc to other accts in microalgos using inner transactions
+        # sends payments from asc to other accounts in microalgos using inner transactions
         return Seq([
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
@@ -196,8 +196,8 @@ def approval():
         Assert(amt_to_pay - service_cost > fees_to_pay.load()),
 
         transfer_asset(seller, buyer, App.globalGet(AppVariables.asset_id)),
-        # send_payment(seller, amt_to_pay - service_cost - fees_to_pay.load()),  # pay seller
-        # App.globalPut(AppVariables.collected_fees, collected_fees + fees_to_pay.load()),  # collect fees
+        send_payment(seller, amt_to_pay - service_cost - fees_to_pay.load()),  # pay seller
+        App.globalPut(AppVariables.collected_fees, collected_fees + fees_to_pay.load()),  # collect fees
         App.localDel(seller, AppVariables.amount_payment),  # delete local variables
         App.localDel(seller, AppVariables.approve_transfer),
         App.localDel(buyer, AppVariables.approve_transfer),
@@ -225,13 +225,13 @@ def approval():
     # may fail if the contract does not have enough algo to pay the inner transaction
     # (the creator should take care of funding the contract in this case)
     claim_fees = Seq([
-        Assert(Global.group_size() == Int(1)),  # Verify that it is only 1 transaction
-        Assert(Txn.application_args.length() == Int(1)),  # Check that there is only 1 argument
-        default_transaction_checks(Int(0)),  # Perform default transaction checks
-        Assert(Txn.sender() == App.globalGet(AppVariables.creator)),  # Verify that the sender is the creator
-        Assert(App.globalGet(AppVariables.collected_fees) > Int(0)),  # Check that there are enough fees to collect
-        send_payment(App.globalGet(AppVariables.creator), App.globalGet(AppVariables.collected_fees)),  # Pay creator
-        App.globalPut(AppVariables.collected_fees, Int(0)),  # Reset collected fees
+        Assert(Global.group_size() == Int(1)),  # verify that it is only 1 transaction
+        Assert(Txn.application_args.length() == Int(1)),  # check that there is only 1 argument
+        default_transaction_checks(Int(0)),  # perform default transaction checks
+        Assert(Txn.sender() == App.globalGet(AppVariables.creator)),  # verify that the sender is the creator
+        Assert(App.globalGet(AppVariables.collected_fees) > Int(0)),  # check that there are enough fees to collect
+        send_payment(App.globalGet(AppVariables.creator), App.globalGet(AppVariables.collected_fees)),  # pay creator
+        App.globalPut(AppVariables.collected_fees, Int(0)),  # reset collected fees
         Approve()
     ])
 

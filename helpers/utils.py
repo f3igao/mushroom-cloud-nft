@@ -2,7 +2,7 @@ import base64
 import json
 import os
 
-from algosdk import encoding, mnemonic
+from algosdk import encoding, mnemonic, account
 from algosdk.v2client import algod
 
 
@@ -82,7 +82,8 @@ def get_private_key_from_mnemonic(mn):
 
 # converts a mnemonic passphrase into a public key
 def get_public_key_from_mnemonic(mn):
-    public_key = mnemonic.to_public_key(mn)
+    private_key = mnemonic.to_private_key(mn)
+    public_key = account.address_from_private_key(private_key)
     return public_key
 
 

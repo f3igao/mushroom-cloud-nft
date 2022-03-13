@@ -3,7 +3,7 @@ import os
 from algosdk.future import transaction
 from dotenv import load_dotenv
 
-from asc.utils import create_algod_client
+from helpers.utils import get_algod_client
 
 CID = 'bafybeidhxawiaatauhvxa5l32m4fdaavyztqdrnlz63po2aq5wwerbpmoe'
 IPFS_URL = 'ipfs://' + CID
@@ -18,19 +18,20 @@ def create_asa():
     address = os.getenv('CREATOR_ADDRESS')
 
     # create purestake algod_client to send requests
-    algod_client = create_algod_client()
+    algod_client = get_algod_client()
+    params = algod_client.suggested_params()
 
     txn = transaction.AssetConfigTxn(
         sender=address,
-        sp=algod_client.suggested_params(),
+        sp=params,
         total=1,
         default_frozen=False,
-        unit_name="MUSHROOM",
+        unit_name='MC',
         asset_name="Nancy Baker's Mushroom Cloud",
-        manager='',
+        manager=address,
         reserve='',
         freeze='',
-        clawback='',
+        clawback=address,
         url=IPFS_URL,
         # metadata_hash=json_metadata_hash,
         strict_empty_address_check=False,
@@ -40,7 +41,7 @@ def create_asa():
     )
 
     # sign transaction with our private key to confirm authorization
-    signed_txn = txn.sign(private_key=private_key)
+    signed_txn = txn.sign(private_key)
     print('signing transaction to create asa...')
 
     try:

@@ -129,6 +129,53 @@ app_local_del
 int 1
 return
 main_l14:
+gtxn 0 NumAppArgs
+int 1
+==
+assert
+global GroupSize
+int 1
+==
+assert
+int 0
+callsub sub0
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_get
+int 1
+==
+assert
+gtxna 0 Accounts 1
+gtxn 0 Sender
+!=
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_get
+int 1
+==
+&&
+global Round
+byte "waiting_time"
+app_global_get
+gtxna 0 Accounts 1
+byte "round_sale_began"
+app_local_get
++
+>
+||
+assert
+int 2
+global MinTxnFee
+*
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+<
+assert
+gtxna 0 Accounts 1
+byte "asset_id"
+app_global_get
+callsub sub3
 gtxna 0 Accounts 1
 byte "creator"
 app_global_get
@@ -145,13 +192,10 @@ byte "royalty_fee"
 app_global_get
 callsub sub4
 main_l16:
-store 2
-gtxna 0 Accounts 1
-gtxn 0 Sender
-byte "assetId"
-app_global_get
-callsub sub2
-gtxna 0 Accounts 1
+store 4
+int 18446744073709551615
+load 4
+-
 gtxna 0 Accounts 1
 byte "amount_payment"
 app_local_get
@@ -159,16 +203,58 @@ int 2
 global MinTxnFee
 *
 -
-load 2
+>=
+assert
+int 18446744073709551615
+byte "collected_fees"
+app_global_get
 -
-callsub sub1
+load 4
+>=
+assert
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_get
+int 2
+global MinTxnFee
+*
+-
+load 4
+>
+assert
+gtxna 0 Accounts 1
+gtxn 0 Sender
+byte "asset_id"
+app_global_get
+callsub sub2
+gtxna 0 Accounts 1
+byte "amount_payment"
+app_local_del
+gtxna 0 Accounts 1
+byte "approve_transfer"
+app_local_del
+gtxn 0 Sender
+byte "approve_transfer"
+app_local_del
 int 1
 return
 main_l17:
 int 1
 b main_l16
 main_l18:
-byte "assetId"
+gtxn 0 NumAppArgs
+int 2
+==
+assert
+global GroupSize
+int 2
+==
+assert
+gtxn 1 TypeEnum
+int pay
+==
+assert
+byte "asset_id"
 app_global_get
 gtxna 0 ApplicationArgs 1
 btoi
@@ -191,7 +277,7 @@ gtxn 1 Receiver
 ==
 assert
 gtxna 0 Accounts 1
-byte "assetId"
+byte "asset_id"
 app_global_get
 callsub sub3
 gtxn 0 Sender
@@ -213,6 +299,14 @@ app_local_put
 int 1
 return
 main_l19:
+txn NumAppArgs
+int 2
+==
+assert
+global GroupSize
+int 1
+==
+assert
 int 0
 callsub sub0
 txna ApplicationArgs 1
@@ -220,8 +314,19 @@ btoi
 int 0
 >
 assert
+byte "asset_id"
+app_global_get
+asset_params_get AssetClawback
+store 2
+store 3
+load 2
+assert
+load 3
+global CurrentApplicationAddress
+==
+assert
 txn Sender
-byte "assetId"
+byte "asset_id"
 app_global_get
 callsub sub3
 txna ApplicationArgs 1
@@ -281,7 +386,7 @@ assert
 byte "creator"
 txna ApplicationArgs 0
 app_global_put
-byte "assetId"
+byte "asset_id"
 txna ApplicationArgs 1
 btoi
 app_global_put
@@ -296,135 +401,135 @@ app_global_put
 int 1
 return
 sub0: // default_transaction_checks
-store 3
-load 3
+store 5
+load 5
 global GroupSize
 <
 assert
-load 3
+load 5
 gtxns RekeyTo
 global ZeroAddress
 ==
 assert
-load 3
+load 5
 gtxns CloseRemainderTo
 global ZeroAddress
 ==
 assert
-load 3
+load 5
 gtxns AssetCloseTo
 global ZeroAddress
 ==
 assert
 retsub
 sub1: // send_payment
-store 5
-store 4
+store 7
+store 6
 itxn_begin
 int pay
 itxn_field TypeEnum
-load 5
+load 7
 itxn_field Amount
-load 4
+load 6
 itxn_field Receiver
 global MinTxnFee
 itxn_field Fee
 itxn_submit
 retsub
 sub2: // transfer_asset
+store 10
+store 9
 store 8
-store 7
-store 6
 itxn_begin
 int axfer
 itxn_field TypeEnum
 int 1
 itxn_field AssetAmount
-load 7
+load 9
 itxn_field AssetReceiver
-load 6
-itxn_field AssetSender
 load 8
+itxn_field AssetSender
+load 10
 itxn_field XferAsset
 global MinTxnFee
 itxn_field Fee
 itxn_submit
 retsub
 sub3: // check_nft_balance
-store 10
-store 9
-load 9
-load 10
-asset_holding_get AssetBalance
-store 11
 store 12
+store 11
 load 11
+load 12
+asset_holding_get AssetBalance
+store 13
+store 14
+load 13
 int 1
 ==
 assert
-load 12
+load 14
 int 1
 ==
 assert
 retsub
 sub4: // compute_royalty_fee
-store 14
-store 13
-load 13
-load 14
+store 16
+store 15
+load 15
+load 16
 callsub sub5
-load 13
-load 14
+load 15
+load 16
 *
 int 1000
 %
-store 15
-load 13
-load 14
+store 17
+load 15
+load 16
 *
 int 1000
 /
-store 16
-load 14
+store 18
+load 16
 int 0
 ==
-load 16
+load 18
 int 0
 ==
 ||
 bnz sub4_l6
-load 14
+load 16
 int 1000
 >=
 bnz sub4_l5
-load 15
+load 17
 int 500
 >
 bnz sub4_l4
-load 16
+load 18
 b sub4_l7
 sub4_l4:
-load 16
+load 18
 int 1
 +
 b sub4_l7
 sub4_l5:
-load 13
+load 15
 b sub4_l7
 sub4_l6:
 int 0
 sub4_l7:
 retsub
 sub5: // check_royalty_fee_computation
-store 18
-store 17
-load 17
+store 20
+store 19
+load 19
 int 0
 >
 assert
-load 18
+load 20
 int 18446744073709551615
-load 17
+load 19
 /
 <=
 assert

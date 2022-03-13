@@ -5,10 +5,10 @@ from algosdk.logic import get_application_address
 from dotenv import load_dotenv
 from pyteal import compileTeal, Mode
 
-from operations import create_app
-from services.consts import DefaultValues
-from smart_contract import approval_program, clear_program
-from utils import (
+from helpers.operations import create_app
+from helpers.consts import DefaultValues
+from contract import approval, clear
+from helpers.utils import (
     compile_program,
     get_private_key_from_mnemonic,
     get_public_key_from_mnemonic,
@@ -16,15 +16,15 @@ from utils import (
     int_to_bytes,
     print_asset_holding,
 )
-from utils import create_algod_client
+from helpers.utils import get_algod_client
 
 load_dotenv()
 
 creator_mnemonic = os.getenv('CREATOR_MNEMONIC')
 print('creator_mnemonic', creator_mnemonic)
 asset_id = int(os.getenv('ASSET_ID'))
-royalty_fee = DefaultValues.RoyaltyFee
-waiting_time = DefaultValues.WaitingTime
+royalty_fee = DefaultValues.royalty_fee
+waiting_time = DefaultValues.waiting_time
 
 print(f'creator public key: {get_public_key_from_mnemonic(creator_mnemonic)}')
 print(f'asset ID: {asset_id}')
@@ -32,7 +32,7 @@ print(f'royalty fee: {royalty_fee / 10}%')
 print(f'waiting time: {waiting_time} seconds')
 
 # create purestake client
-algod_client = create_algod_client()
+algod_client = get_algod_client()
 
 # define private keys
 creator_private_key = get_private_key_from_mnemonic(creator_mnemonic)
@@ -45,23 +45,23 @@ global_bytes = 1
 global_schema = transaction.StateSchema(global_ints, global_bytes)
 local_schema = transaction.StateSchema(local_ints, local_bytes)
 
-# get PyTeal approval program
-approval_program_ast = approval_program()
+# get pyteal approval program
+approval_program_ast = approval()
 # compile program to TEAL assembly
 approval_program_teal = compileTeal(approval_program_ast, mode=Mode.Application, version=5)
 # compile program to binary
 approval_program_compiled = compile_program(algod_client, approval_program_teal)
+# create approval teal file for verification
+with open('../teal/approval.teal', 'w+') as f:
+    f.write(str(approval_program_teal))
 
-# get PyTeal clear state program
-clear_state_program_ast = clear_program()
+# get pyteal clear state program
+clear_state_program_ast = clear()
 # compile program to TEAL assembly
 clear_state_program_teal = compileTeal(clear_state_program_ast, mode=Mode.Application, version=5)
 # compile program to binary
 clear_state_program_compiled = compile_program(algod_client, clear_state_program_teal)
-# create approval teal file for verification
-with open('../teal/approval.teal', 'w+') as f:
-    f.write(str(approval_program_teal))
-# create approval teal file for verification
+# create clear teal file for verification
 with open('../teal/clear.teal', 'w+') as f:
     f.write(str(clear_state_program_teal))
 

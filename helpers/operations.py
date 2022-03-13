@@ -3,7 +3,7 @@ from algosdk.future import transaction
 from algosdk.logic import get_application_address
 from algosdk.v2client.algod import AlgodClient
 
-from asc.utils import wait_for_confirmation
+from helpers.utils import wait_for_confirmation
 
 
 # create new application
@@ -44,21 +44,20 @@ def create_app(
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
-    print("sending create_app transaction")
+    print('sending create_app transaction')
     client.send_transactions([signed_txn])
-
-    print("waiting for create_app confirmation")
+    print('waiting for create_app confirmation')
     wait_for_confirmation(client, txn_id)
 
     # display results
     transaction_response = client.pending_transaction_info(txn_id)
-    app_id = transaction_response["application-index"]
-    print("created new app with id:", app_id)
+    app_id = transaction_response['application-index']
+    print('created new app with id', app_id)
     return app_id
 
 
 # opt-in to application
-def opt_in_app(client, private_key, index):
+def opt_in(client: AlgodClient, private_key: str, index: int):
     # declare sender
     sender = account.address_from_private_key(private_key)
     print('opt-in from account: ', sender)
@@ -74,8 +73,9 @@ def opt_in_app(client, private_key, index):
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
+    print('sending opt_in transaction')
     client.send_transactions([signed_txn])
-
+    print('waiting for opt_in transaction')
     wait_for_confirmation(client, txn_id)
 
     # display results
@@ -98,43 +98,44 @@ def send_funds(client, private_key, receiver):
     signed_txn = txn.sign(private_key)
     txn_id = signed_txn.transaction.get_txid()
 
+    print('sending send_funds transaction')
     client.send_transactions([signed_txn])
+    print('waiting for send_funds transaction')
     wait_for_confirmation(client, txn_id)
     print(f'transaction id: {txn_id}')
 
 
-# def set_clawback(client: AlgodClient, private_key: str, asset_id, app_address):
-#     # define manager as creator
-#     manager = account.address_from_private_key(private_key)
-#     print('manager address:', manager)
-#     print('app address:', app_address)
-#     # get node suggested parameters
-#     params = client.suggested_params()
-#     # comment out the next two lines to use suggested fees
-#     # params.flat_fee = True
-#     # params.fee = 1000
-#
-#     # create unsigned transaction
-#     txn = transaction.AssetConfigTxn(
-#         sender=manager,
-#         sp=params,
-#         index=asset_id,
-#         manager=manager,
-#         reserve=manager,
-#         freeze=app_address,
-#         clawback=app_address,
-#     )
-#     signed_txn = txn.sign(private_key)
-#     txn_id = signed_txn.transaction.get_txid()
-#
-#     print('sending set_clawback transaction')
-#     client.send_transactions([signed_txn])
-#
-#     print('waiting for set_clawback confirmation')
-#     wait_for_confirmation(client, txn_id)
-#
-#     return txn_id
-#
+def set_clawback(client: AlgodClient, private_key: str, asset_id: int, app_address: str):
+    # define manager as creator
+    manager = account.address_from_private_key(private_key)
+    print('manager address:', manager)
+    print('app address:', app_address)
+    # get node suggested parameters
+    params = client.suggested_params()
+    # comment out the next two lines to use suggested fees
+    # params.flat_fee = True
+    # params.fee = 1000
+
+    # create unsigned transaction
+    txn = transaction.AssetConfigTxn(
+        sender=manager,
+        sp=params,
+        index=asset_id,
+        manager=manager,
+        reserve=manager,
+        freeze=app_address,
+        clawback=app_address,
+    )
+    signed_txn = txn.sign(private_key)
+    txn_id = signed_txn.transaction.get_txid()
+
+    print('sending set_clawback transaction')
+    client.send_transactions([signed_txn])
+    print('waiting for set_clawback confirmation')
+    wait_for_confirmation(client, txn_id)
+
+    return txn_id
+
 
 # setup sale using the application
 def setup_sale(
@@ -167,7 +168,6 @@ def setup_sale(
 
     print('sending setup_sale transaction')
     client.send_transactions([signed_txn])
-
     print('waiting for setup_sale confirmation')
     wait_for_confirmation(client, txn_id)
 
@@ -209,9 +209,7 @@ def buy_asset(
     )
 
     # create unsigned payment transaction
-    pay_txn = transaction.PaymentTxn(
-        sender=buyer, receiver=app_address, amt=price, sp=params
-    )
+    pay_txn = transaction.PaymentTxn(sender=buyer, receiver=app_address, amt=price, sp=params)
 
     transaction.assign_group_id([app_call_txn, pay_txn])
     signed_app_call_txn = app_call_txn.sign(private_key)
@@ -267,7 +265,6 @@ def buyer_execute_transfer(
 
     print('sending buyer execution transaction')
     client.send_transactions([signed_txn])
-
     print('waiting for buyer_execute_transfer confirmation')
     wait_for_confirmation(client, txn_id)
 
@@ -303,7 +300,6 @@ def claim_fees(
 
     print('sending claim_fees transaction')
     client.send_transactions([signed_txn])
-
     print('waiting for claim_fees confirmation')
     wait_for_confirmation(client, txn_id)
 

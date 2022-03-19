@@ -2,18 +2,16 @@ import base64
 import json
 import os
 
-from algosdk import encoding, mnemonic, account
+from algosdk import encoding, mnemonic, account, v2client
 from algosdk.v2client import algod
 
 
 def get_algod_client():
-    # TODO: update to mainnet
-    endpoint = 'https://testnet-algorand.api.purestake.io/ps2'
     token = ''
-    headers = {
-        'X-API-Key': os.getenv('PURESTAKE_KEY'),
-    }
-    return algod.AlgodClient(token, endpoint, headers)
+    endpoint = 'https://node.algoexplorerapi.io'
+    endpoint = 'https://node.testnet.algoexplorerapi.io'
+    headers = ''
+    return v2client.algod.AlgodClient(token, endpoint, headers)
 
 
 # wait until the transaction is confirmed before proceeding

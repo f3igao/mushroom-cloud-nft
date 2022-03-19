@@ -19,9 +19,6 @@ print(f'creator mnemonic: {mnemonic_a}\n')
 print(f'buyer 1 mnemonic: {mnemonic_b}\n')
 print(f'buyer 2 mnemonic: {mnemonic_c}\n')
 
-# TODO: remove purestake key
-# PURESTAKE_KEY="iPWSaEKVTn9eEibq2s4rj8cpyQz2zzt86ofYyus2"
-
 with open('../.env', 'w') as f:
     f.write(f'CREATOR_ADDRESS="{public_key_a}"\n')
     f.write(f'CREATOR_SECRET="{private_key_a}"\n')

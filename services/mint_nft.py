@@ -1,5 +1,6 @@
 import os
 
+from algosdk import account
 from algosdk.future import transaction
 from dotenv import load_dotenv
 
@@ -14,8 +15,8 @@ json_metadata = json_metadata_raw.read()
 
 
 def create_asa():
-    private_key = os.getenv('CREATOR_SECRET')
-    address = os.getenv('CREATOR_ADDRESS')
+    private_key = os.getenv('ARTIST_MAIN_SECRET')
+    address = account.address_from_private_key(private_key)
 
     # create purestake algod_client to send requests
     algod_client = get_algod_client()

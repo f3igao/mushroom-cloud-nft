@@ -1,36 +1,32 @@
 import base64
 import json
-import os
 
 from algosdk import encoding, mnemonic, account, v2client
-from algosdk.v2client import algod
+from algosdk.v2client.algod import AlgodClient
 
 
 def get_algod_client():
     token = ''
-    endpoint = 'https://node.algoexplorerapi.io'
+    # endpoint = 'https://node.algoexplorerapi.io'
     endpoint = 'https://node.testnet.algoexplorerapi.io'
     headers = ''
     return v2client.algod.AlgodClient(token, endpoint, headers)
 
 
 # wait until the transaction is confirmed before proceeding
-def wait_for_confirmation(client, txn_id):
-    last_round = client.status().get('last-round')
-    txn_info = client.pending_transaction_info(txn_id)
+def wait_for_confirmation(algod_client: AlgodClient, txn_id: str):
+    last_round = algod_client.status().get('last-round')
+    txn_info = algod_client.pending_transaction_info(txn_id)
     while not (txn_info.get('confirmed-round') and txn_info.get('confirmed-round') > 0):
         last_round += 1
-        client.status_after_block(last_round)
-        txn_info = client.pending_transaction_info(txn_id)
+        algod_client.status_after_block(last_round)
+        txn_info = algod_client.pending_transaction_info(txn_id)
     print(f'transaction {txn_id} confirmed in round {txn_info.get("confirmed-round")}.')
     return txn_info
 
 
 # prints created asset for account and asset_id
-def print_created_asset(algod_client, account, asset_id):
-    # note: if you have an indexer instance available it is easier to just use this
-    # response = myindexer.accounts(asset_id = asset_id)
-    # then use 'account_info['created-assets'][0] to get info on the created asset
+def print_created_asset(algod_client: AlgodClient, account: str, asset_id: int):
     account_info = algod_client.account_info(account)
     idx = 0
     for my_account_info in account_info['created-assets']:
@@ -43,7 +39,7 @@ def print_created_asset(algod_client, account, asset_id):
 
 
 # prints asset holding for account and asset_id
-def print_asset_holding(algod_client, account, asset_id):
+def print_asset_holding(algod_client: AlgodClient, account: str, asset_id: int):
     # note: if you have an indexer instance available it is easier to just use this
     # response = myindexer.accounts(asset_id = asset_id)
     # then loop thru the accounts returned and match the account you are looking for
@@ -67,8 +63,8 @@ def metadata_template(description, standard, external_url, attributes):
 
 
 # compiles program source
-def compile_program(client, source_code):
-    compile_response = client.compile(source_code)
+def compile_program(algod_client: AlgodClient, source_code):
+    compile_response = algod_client.compile(source_code)
     return base64.b64decode(compile_response['result'])
 
 

@@ -1,24 +1,21 @@
 import os
 
+from algosdk import mnemonic
 from algosdk.future import transaction
 from algosdk.logic import get_application_address
-from dotenv import load_dotenv
 from pyteal import compileTeal, Mode
 
-from helpers.operations import create_app
-from helpers.consts import DefaultValues
 from contract import approval, clear
+from helpers.consts import DefaultValues
+from helpers.operations import create_app
 from helpers.utils import (
     compile_program,
-    get_private_key_from_mnemonic,
     get_public_key_from_mnemonic,
     address_to_bytes,
     int_to_bytes,
     print_asset_holding,
 )
 from helpers.utils import get_algod_client
-
-load_dotenv()
 
 creator_mnemonic = os.getenv('CREATOR_MNEMONIC')
 print('creator_mnemonic', creator_mnemonic)
@@ -35,7 +32,7 @@ print(f'waiting time: {waiting_time} seconds')
 algod_client = get_algod_client()
 
 # define private keys
-creator_private_key = get_private_key_from_mnemonic(creator_mnemonic)
+creator_private_key = mnemonic.to_private_key(creator_mnemonic)
 
 # declare application state storage (immutable)
 local_ints = 3

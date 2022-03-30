@@ -2,7 +2,7 @@ import random
 
 from pyteal import *
 
-from helpers.consts import AppVariables
+from helpers.consts import DefaultValues
 
 
 def asset_sale_contract(seller: str, asset_index: int, price: int):
@@ -105,14 +105,12 @@ def asset_sale_contract(seller: str, asset_index: int, price: int):
         ),
     )
 
-    contract_teal = compileTeal(contract_py, Mode.Signature, version=6)
-    return contract_teal
+    return compileTeal(contract_py, Mode.Signature, version=6)
 
 
 ARTIST_MAIN_ADDRESS = "PIQVKPN4EAHMS74DK5CSCIZCJ6CM7OSIUZYQ5Y6MYFP26XZHBPRNJHAPDA"
 ASSET_ID = 78961298
-PRICE = 100
 
-contract_teal = asset_sale_contract(ARTIST_MAIN_ADDRESS, ASSET_ID, PRICE)
+contract_teal = asset_sale_contract(ARTIST_MAIN_ADDRESS, ASSET_ID, DefaultValues.royalty_fee)
 with open('../teal/asset_sale_contract.teal', 'w+') as f:
     f.write(str(contract_teal))

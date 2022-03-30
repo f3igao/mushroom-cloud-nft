@@ -10,8 +10,8 @@ txn RekeyTo
 global ZeroAddress
 ==
 &&
-int 9915935
-int 9915935
+int 8150386
+int 8150386
 ==
 &&
 global GroupSize
@@ -32,7 +32,7 @@ int pay
 ==
 &&
 gtxn 0 Amount
-int 90000000
+int 45000000
 ==
 &&
 gtxn 0 Receiver
@@ -112,7 +112,7 @@ int pay
 ==
 &&
 gtxn 4 Amount
-int 10000000
+int 5000000
 ==
 &&
 gtxn 4 Receiver

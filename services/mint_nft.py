@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from helpers.utils import get_algod_client
 
-CID = 'bafybeidhxawiaatauhvxa5l32m4fdaavyztqdrnlz63po2aq5wwerbpmoe'
+CID = 'QmRm2AFpxXTAoQ1wXXc8WmxvP8vXMJtNqgHrtU5vhvLQ8k'
 IPFS_URL = 'ipfs://' + CID
 print(f'ipfs url: {IPFS_URL}')
 
@@ -27,12 +27,12 @@ def create_asa():
         sp=params,
         total=1,
         default_frozen=False,
-        unit_name='mc',
+        unit_name='nft',
         asset_name='nancy baker mushroom cloud',
         manager=address,
         reserve='',
         freeze='',
-        clawback=address,
+        clawback='',
         url=IPFS_URL,
         # metadata_hash=json_metadata_hash,
         strict_empty_address_check=False,
